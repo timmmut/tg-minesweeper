@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сапер - Telegram Mini App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Сапер</h1>
+            <div class="game-info">
+                <div class="mines-counter">Мины: <span id="mines-count">0</span></div>
+                <div class="timer">Время: <span id="timer">0</span></div>
+            </div>
+        </div>
+        
+        <div class="game-settings">
+            <div class="difficulty">
+                <button class="difficulty-btn active" data-difficulty="easy">Легкий</button>
+                <button class="difficulty-btn" data-difficulty="medium">Средний</button>
+                <button class="difficulty-btn" data-difficulty="hard">Сложный</button>
+            </div>
+            <button id="new-game-btn">Новая игра</button>
+        </div>
+        
+        <div id="game-board" class="game-board"></div>
+    </div>
+    
+    <script src="telegram.js"></script>
+    <script src="script.js"></script>
+</body>
+</html> 
