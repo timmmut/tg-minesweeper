@@ -40,6 +40,20 @@ document.addEventListener('DOMContentLoaded', function() {
     if (currentDifficulty === 'fast') {
         fastDescription.style.display = 'block';
     }
+    
+    // Предотвращаем выделение текста на мобильных устройствах
+    document.addEventListener('touchstart', function(e) {
+        // Для кнопок и интерактивных элементов
+        if (e.target.closest('.cell, button')) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+    
+    // Отключаем контекстное меню на всей игре
+    gameBoard.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        return false;
+    });
 });
 
 // Настройка обработчиков событий
@@ -166,6 +180,7 @@ function renderBoard() {
             
             // Для мобильных устройств
             cellElement.addEventListener('touchstart', function(e) {
+                e.preventDefault(); // Предотвращаем выделение и другие стандартные действия
                 pressTimer = setTimeout(function() {
                     longPressTriggered = true;
                     toggleFlag(row, col);
@@ -173,15 +188,16 @@ function renderBoard() {
             });
             
             cellElement.addEventListener('touchend', function(e) {
+                e.preventDefault(); // Предотвращаем выделение и другие стандартные действия
                 clearTimeout(pressTimer);
                 if (!longPressTriggered) {
                     handleCellClick(row, col);
                 }
                 longPressTriggered = false;
-                e.preventDefault(); // Предотвращаем двойные события
             });
             
             cellElement.addEventListener('touchmove', function(e) {
+                e.preventDefault(); // Предотвращаем выделение и другие стандартные действия
                 clearTimeout(pressTimer);
                 longPressTriggered = false;
             });
