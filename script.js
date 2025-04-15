@@ -2,7 +2,7 @@
 const DIFFICULTY_SETTINGS = {
     easy: { rows: 9, cols: 9, mines: 10 },
     medium: { rows: 16, cols: 16, mines: 40 },
-    fast: { rows: 16, cols: 30, mines: 99 }
+    fast: { rows: 10, cols: 10, mines: 15 }
 };
 
 // Игровые состояния
@@ -34,6 +34,12 @@ const timerDisplay = document.getElementById('timer');
 document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
     initializeGame(currentDifficulty);
+    
+    // Показываем описание режима, если выбран быстрый режим
+    const fastDescription = document.getElementById('fast-description');
+    if (currentDifficulty === 'fast') {
+        fastDescription.style.display = 'block';
+    }
 });
 
 // Настройка обработчиков событий
@@ -50,6 +56,14 @@ function setupEventListeners() {
             this.classList.add('active');
             currentDifficulty = this.dataset.difficulty;
             initializeGame(currentDifficulty);
+            
+            // Показываем/скрываем описание режима
+            const fastDescription = document.getElementById('fast-description');
+            if (currentDifficulty === 'fast') {
+                fastDescription.style.display = 'block';
+            } else {
+                fastDescription.style.display = 'none';
+            }
         });
     });
 }

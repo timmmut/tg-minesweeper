@@ -76,6 +76,19 @@ h1 {
     color: var(--tg-theme-button-text-color, #ffffff);
 }
 
+.difficulty-description {
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    text-align: center;
+    color: #555;
+    padding: 0.5rem;
+}
+
+.mode-description {
+    margin: 0;
+    padding: 5px;
+}
+
 #new-game-btn {
     width: 100%;
     padding: 0.8rem;
