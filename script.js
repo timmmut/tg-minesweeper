@@ -22,6 +22,7 @@ let timer;
 let seconds = 0;
 let firstClick = true;
 let bombMoveTimer; // Таймер для перемещения бомб
+let flagMode = false; // Режим установки флажков
 
 // DOM элементы
 const gameBoard = document.getElementById('game-board');
@@ -29,6 +30,7 @@ const newGameBtn = document.getElementById('new-game-btn');
 const difficultyBtns = document.querySelectorAll('.difficulty-btn');
 const minesCountDisplay = document.getElementById('mines-count');
 const timerDisplay = document.getElementById('timer');
+const flagModeBtn = document.getElementById('flag-mode-btn');
 
 // Инициализация игры
 document.addEventListener('DOMContentLoaded', function() {
@@ -61,6 +63,23 @@ function setupEventListeners() {
     // Кнопка новой игры
     newGameBtn.addEventListener('click', function() {
         initializeGame(currentDifficulty);
+    });
+    
+    // Кнопка переключения режима
+    flagModeBtn.addEventListener('click', function() {
+        flagMode = !flagMode;
+        if (flagMode) {
+            this.textContent = 'Режим: Флажки';
+            this.classList.add('flag-mode');
+        } else {
+            this.textContent = 'Режим: Открытие';
+            this.classList.remove('flag-mode');
+        }
+        
+        // Применяем вибрацию для Telegram WebApp
+        if (window.telegramAPI) {
+            window.telegramAPI.vibrate('impact');
+        }
     });
     
     // Кнопки сложности
@@ -149,60 +168,20 @@ function renderBoard() {
                 cellElement.textContent = '🚩';
             }
             
-            // Переменные для обработки долгого нажатия
-            let pressTimer;
-            let longPressTriggered = false;
-            
-            // Обработчик начала нажатия
-            cellElement.addEventListener('mousedown', function(e) {
-                if (e.button === 0) { // Только для левой кнопки мыши
-                    pressTimer = setTimeout(function() {
-                        longPressTriggered = true;
-                        toggleFlag(row, col);
-                    }, 1500); // 1.5 секунды
+            // Обработчик клика для десктопа и мобильных устройств
+            cellElement.addEventListener('click', function() {
+                if (gameState === GAME_STATES.GAME_OVER || gameState === GAME_STATES.WIN) {
+                    return;
                 }
-            });
-            
-            // Обработчик отпускания кнопки мыши
-            cellElement.addEventListener('mouseup', function(e) {
-                clearTimeout(pressTimer);
-                if (!longPressTriggered && e.button === 0) {
-                    handleCellClick(row, col);
-                }
-                longPressTriggered = false;
-            });
-            
-            // Обработчик выхода курсора за пределы элемента
-            cellElement.addEventListener('mouseout', function() {
-                clearTimeout(pressTimer);
-                longPressTriggered = false;
-            });
-            
-            // Для мобильных устройств
-            cellElement.addEventListener('touchstart', function(e) {
-                e.preventDefault(); // Предотвращаем выделение и другие стандартные действия
-                pressTimer = setTimeout(function() {
-                    longPressTriggered = true;
+                
+                if (flagMode) {
                     toggleFlag(row, col);
-                }, 1500); // 1.5 секунды
-            });
-            
-            cellElement.addEventListener('touchend', function(e) {
-                e.preventDefault(); // Предотвращаем выделение и другие стандартные действия
-                clearTimeout(pressTimer);
-                if (!longPressTriggered) {
+                } else {
                     handleCellClick(row, col);
                 }
-                longPressTriggered = false;
             });
             
-            cellElement.addEventListener('touchmove', function(e) {
-                e.preventDefault(); // Предотвращаем выделение и другие стандартные действия
-                clearTimeout(pressTimer);
-                longPressTriggered = false;
-            });
-            
-            // Обработчик правой кнопки мыши (контекстное меню)
+            // Обработчик правой кнопки мыши (для десктопа)
             cellElement.addEventListener('contextmenu', function(e) {
                 e.preventDefault();
                 if (gameState === GAME_STATES.PLAYING || gameState === GAME_STATES.WAITING) {

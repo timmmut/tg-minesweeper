@@ -145,4 +145,36 @@ h1 {
 .cell[data-mines="5"] { color: maroon; }
 .cell[data-mines="6"] { color: turquoise; }
 .cell[data-mines="7"] { color: black; }
-.cell[data-mines="8"] { color: gray; } 
+.cell[data-mines="8"] { color: gray; }
+
+body, .cell {
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version */
+    touch-action: manipulation; /* Предотвращает масштабирование при двойном тапе */
+}
+
+.game-controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+#flag-mode-btn {
+    background-color: var(--tg-theme-button-color, #3390ec);
+    color: var(--tg-theme-button-text-color, #ffffff);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 15px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#flag-mode-btn.flag-mode {
+    background-color: #ff9f43;
+} 
