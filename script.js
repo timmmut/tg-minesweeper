@@ -2,7 +2,7 @@
 const DIFFICULTY_SETTINGS = {
     easy: { rows: 9, cols: 9, mines: 10 },
     medium: { rows: 16, cols: 16, mines: 40 },
-    hard: { rows: 16, cols: 30, mines: 99 }
+    fast: { rows: 16, cols: 30, mines: 99 }
 };
 
 // Игровые состояния
@@ -21,6 +21,7 @@ let minesCount;
 let timer;
 let seconds = 0;
 let firstClick = true;
+let bombMoveTimer; // Таймер для перемещения бомб
 
 // DOM элементы
 const gameBoard = document.getElementById('game-board');
@@ -227,6 +228,11 @@ function startGame(row, col) {
     
     // Запуск таймера
     startTimer();
+    
+    // Запуск таймера перемещения бомб в быстром режиме
+    if (currentDifficulty === 'fast') {
+        startBombMoveTimer();
+    }
     
     // Проверяем условие победы (на случай, если открыли большой пустой участок сразу)
     checkWinCondition();
@@ -443,4 +449,70 @@ function stopTimer() {
         clearInterval(timer);
         timer = null;
     }
+    
+    // Останавливаем таймер перемещения бомб
+    if (bombMoveTimer) {
+        clearInterval(bombMoveTimer);
+        bombMoveTimer = null;
+    }
+}
+
+// Функция запуска таймера перемещения бомб
+function startBombMoveTimer() {
+    if (bombMoveTimer) {
+        clearInterval(bombMoveTimer);
+    }
+    
+    bombMoveTimer = setInterval(() => {
+        if (gameState === GAME_STATES.PLAYING) {
+            moveBombs();
+        }
+    }, 5000);
+}
+
+// Функция перемещения бомб
+function moveBombs() {
+    const rows = board.length;
+    const cols = board[0].length;
+    
+    // Удаляем все бомбы
+    let removedBombs = [];
+    
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            const cell = board[row][col];
+            
+            // Собираем информацию о бомбах в закрытых и не помеченных флажками клетках
+            if (cell.isMine && !cell.isRevealed && !cell.isFlagged) {
+                removedBombs.push({ row, col });
+                cell.isMine = false;
+            }
+        }
+    }
+    
+    // Размещаем бомбы в новых местах
+    let placedBombs = 0;
+    
+    while (placedBombs < removedBombs.length) {
+        const randomRow = Math.floor(Math.random() * rows);
+        const randomCol = Math.floor(Math.random() * cols);
+        const cell = board[randomRow][randomCol];
+        
+        // Размещаем только в закрытых и не помеченных флажками клетках
+        if (!cell.isMine && !cell.isRevealed && !cell.isFlagged) {
+            cell.isMine = true;
+            placedBombs++;
+        }
+    }
+    
+    // Пересчитываем количество мин рядом с каждой клеткой
+    calculateNeighborMines();
+    
+    // Вибрация при перемещении бомб (если доступно)
+    if (window.telegramAPI) {
+        window.telegramAPI.vibrate('warning');
+    }
+    
+    // Обновляем отображение (только для открытых ячеек)
+    renderBoard();
 } 
