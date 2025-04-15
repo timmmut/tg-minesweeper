@@ -45,11 +45,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Предотвращаем выделение текста на мобильных устройствах
     document.addEventListener('touchstart', function(e) {
-        // Для кнопок и интерактивных элементов
+        // Только предотвращаем длительное зажатие и выделение, но разрешаем клики
         if (e.target.closest('.cell, button')) {
-            e.preventDefault();
+            // Убираем preventDefault(), чтобы не блокировать все события
+            // Вместо этого полагаемся на CSS свойства для предотвращения выделения
         }
-    }, { passive: false });
+    }, { passive: true });
     
     // Отключаем контекстное меню на всей игре
     gameBoard.addEventListener('contextmenu', function(e) {
@@ -62,6 +63,12 @@ document.addEventListener('DOMContentLoaded', function() {
 function setupEventListeners() {
     // Кнопка новой игры
     newGameBtn.addEventListener('click', function() {
+        initializeGame(currentDifficulty);
+    });
+    
+    // Дублируем обработчик для touchend
+    newGameBtn.addEventListener('touchend', function(e) {
+        e.preventDefault();
         initializeGame(currentDifficulty);
     });
     
@@ -82,9 +89,44 @@ function setupEventListeners() {
         }
     });
     
+    // Дублируем обработчик для touchend
+    flagModeBtn.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        flagMode = !flagMode;
+        if (flagMode) {
+            this.textContent = 'Режим: Флажки';
+            this.classList.add('flag-mode');
+        } else {
+            this.textContent = 'Режим: Открытие';
+            this.classList.remove('flag-mode');
+        }
+        
+        // Применяем вибрацию для Telegram WebApp
+        if (window.telegramAPI) {
+            window.telegramAPI.vibrate('impact');
+        }
+    });
+    
     // Кнопки сложности
     difficultyBtns.forEach(button => {
         button.addEventListener('click', function() {
+            difficultyBtns.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            currentDifficulty = this.dataset.difficulty;
+            initializeGame(currentDifficulty);
+            
+            // Показываем/скрываем описание режима
+            const fastDescription = document.getElementById('fast-description');
+            if (currentDifficulty === 'fast') {
+                fastDescription.style.display = 'block';
+            } else {
+                fastDescription.style.display = 'none';
+            }
+        });
+        
+        // Дублируем обработчик для touchend
+        button.addEventListener('touchend', function(e) {
+            e.preventDefault();
             difficultyBtns.forEach(btn => btn.classList.remove('active'));
             this.classList.add('active');
             currentDifficulty = this.dataset.difficulty;
@@ -173,6 +215,22 @@ function renderBoard() {
                 if (gameState === GAME_STATES.GAME_OVER || gameState === GAME_STATES.WIN) {
                     return;
                 }
+                
+                if (flagMode) {
+                    toggleFlag(row, col);
+                } else {
+                    handleCellClick(row, col);
+                }
+            });
+            
+            // Добавляем отдельный обработчик для touchend на мобильных устройствах
+            cellElement.addEventListener('touchend', function(e) {
+                if (gameState === GAME_STATES.GAME_OVER || gameState === GAME_STATES.WIN) {
+                    return;
+                }
+                
+                // Останавливаем дальнейшее распространение события
+                e.stopPropagation();
                 
                 if (flagMode) {
                     toggleFlag(row, col);
