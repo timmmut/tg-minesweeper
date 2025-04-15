@@ -97,7 +97,7 @@ h1 {
 
 .cell {
     aspect-ratio: 1/1;
-    background-color: #e0e0e0;
+    background-color: #cccccc;
     display: flex;
     align-items: center;
     justify-content: center;

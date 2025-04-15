@@ -120,11 +120,58 @@ function renderBoard() {
                 cellElement.textContent = '🚩';
             }
             
-            // Обработчики событий для ячеек
-            cellElement.addEventListener('click', function(e) {
-                handleCellClick(row, col);
+            // Переменные для обработки долгого нажатия
+            let pressTimer;
+            let longPressTriggered = false;
+            
+            // Обработчик начала нажатия
+            cellElement.addEventListener('mousedown', function(e) {
+                if (e.button === 0) { // Только для левой кнопки мыши
+                    pressTimer = setTimeout(function() {
+                        longPressTriggered = true;
+                        toggleFlag(row, col);
+                    }, 1500); // 1.5 секунды
+                }
             });
             
+            // Обработчик отпускания кнопки мыши
+            cellElement.addEventListener('mouseup', function(e) {
+                clearTimeout(pressTimer);
+                if (!longPressTriggered && e.button === 0) {
+                    handleCellClick(row, col);
+                }
+                longPressTriggered = false;
+            });
+            
+            // Обработчик выхода курсора за пределы элемента
+            cellElement.addEventListener('mouseout', function() {
+                clearTimeout(pressTimer);
+                longPressTriggered = false;
+            });
+            
+            // Для мобильных устройств
+            cellElement.addEventListener('touchstart', function(e) {
+                pressTimer = setTimeout(function() {
+                    longPressTriggered = true;
+                    toggleFlag(row, col);
+                }, 1500); // 1.5 секунды
+            });
+            
+            cellElement.addEventListener('touchend', function(e) {
+                clearTimeout(pressTimer);
+                if (!longPressTriggered) {
+                    handleCellClick(row, col);
+                }
+                longPressTriggered = false;
+                e.preventDefault(); // Предотвращаем двойные события
+            });
+            
+            cellElement.addEventListener('touchmove', function(e) {
+                clearTimeout(pressTimer);
+                longPressTriggered = false;
+            });
+            
+            // Обработчик правой кнопки мыши (контекстное меню)
             cellElement.addEventListener('contextmenu', function(e) {
                 e.preventDefault();
                 if (gameState === GAME_STATES.PLAYING || gameState === GAME_STATES.WAITING) {
